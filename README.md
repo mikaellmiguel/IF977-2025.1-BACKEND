@@ -67,6 +67,56 @@ Para gerenciar o versionamento de código.
 Como instalar: Acesse o site oficial do [Git](https://git-scm.com/downloads) e siga as instruções para o seu sistema operacional.
 
 
+## Estrutura do Código (Previsão)
+
+O código a ser desenvolvido será organizado de acordo com a seguinte estrutura, com o objetivo de garantir uma arquitetura limpa, escalável e fácil de manter. Cada parte do sistema será distribuída entre as pastas e módulos apropriados, seguindo boas práticas de desenvolvimento.
+
+```txt
+IF977-ES/
+│
+├── README.md                # Documentação principal do projeto
+├── CONTRIBUTING.md          # Diretrizes para contribuição
+├── BUILD.md                 # Instruções para compilar e construir o projeto
+│
+├── docs                    # Documentos criados ao longo do projeto
+│
+├── backend/                # Código backend do projeto
+   ├── node_modules/        # Módulos do Node.js (gerados automaticamente)
+   ├── src/                 # Código fonte do projeto
+   │   ├── controllers/     # Funções responsáveis por manipular a lógica de cada rota
+   │   ├── routes/          # Definição das rotas da API
+   │   ├── services/        # Consumo de APIs externas
+   │   ├── utils/           # Funções utilitárias
+   │   ├── middlewares/     # Funções de middleware (ex: autenticação)
+   │   └── config/          # Arquivos de configuração (ex: DB)
+   ├── .env                 # Arquivo de variáveis de ambiente
+   ├── .gitignore           # Arquivos e pastas a serem ignorados pelo git
+   ├── package.json         # Dependências e scripts do projeto
+   ├── package-lock.json    # Versões fixas das dependências
+   └── server.js            # Ponto de entrada da aplicação
+
+```
+
+## Links Importantes ‼️
+- [Workspace do Projeto - Github Projects](https://github.com/users/mikaellmiguel/projects/4)
+- [Issues](https://github.com/mikaellmiguel/IF977-2025.1-BACKEND/issues)
+
+
+
+## Como Contribuir 🤝
+Contribuições são sempre bem-vindas! Se você está interessado em melhorar este projeto, fique à vontade para enviar suas sugestões ou mudanças. 
+
+
+### Diretrizes 
+
+Antes de começar a contribuir, orientamos consultar o arquivo [`CONTRIBUTING.md`](https://github.com/mikaellmiguel/IF977-2025.1-BACKEND/blob/main/CONTRIBUTING.MD), onde você encontrará diretrizes detalhadas sobre como contribuir, boas práticas de codificação, como criar branches, e como submeter pull requests.
+
+Estamos abertos a todas as contribuições e ficaremos felizes em revisar e integrar melhorias feitas pela comunidade.
+
+## Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE.md](LICENSE) para detalhes.
+
 ## Créditos
 
 - Mikael Miguel da Silva
