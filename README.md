@@ -1,4 +1,4 @@
-# RedeLeitura
+# FiscalizaDeputado
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 [![GitHub Issues](https://img.shields.io/github/issues/mikaellmiguel/IF977-2025.1-BACKEND.svg)](https://github.com/mikaellmiguel/IF977-ES)
@@ -6,36 +6,34 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 
-## 📚 Descrição Geral
-O **RedeLeitura** é uma aplicação web pensada para leitores que desejam não apenas gerenciar seus hábitos de leitura, mas também descobrir novos livros de forma personalizada e se conectar com outros leitores. Utilizando APIs gratuitas como Google Books e OpenLibrary, a plataforma oferece um sistema de recomendação inteligente com base no histórico de leitura e nas preferências do usuário.
+🏛️ Descrição Geral
+O FiscalizaDeputado é uma aplicação web desenvolvida para ampliar o acesso da população aos dados de despesas declaradas por deputados federais. Utilizando como fonte principal o portal de dados abertos da Câmara dos Deputados (Câmara Aberta), o sistema visa facilitar a fiscalização, aumentar a transparência e promover o controle social por meio de relatórios, visualizações e mapas interativos.
 
-Mais do que um organizador de leituras, o RedeLeitura também funciona como uma rede descentralizada de trocas, vendas e empréstimos de livros entre usuários. É possível anunciar livros físicos que não estão mais em uso e negociar diretamente com leitores interessados. Para garantir confiança nas transações, o sistema conta com um sistema de avaliação de usuários com base em sua reputação nas interações realizadas.
+Além de organizar e exibir os dados de forma clara, o FiscalizaDeputado permite que qualquer cidadão acompanhe os parlamentares de seu interesse, visualize onde e com o quê os recursos públicos estão sendo utilizados (com destaque geográfico por cidade e estado) e identifique padrões de uso dos recursos da cota parlamentar.
 
+## 👥 Público-Alvo
 
-## 🎯 Público-alvo
-Leitores assíduos, estudantes, educadores e qualquer pessoa interessada em literatura e no compartilhamento de conhecimento por meio de livros. A plataforma é ideal para quem busca uma forma mais social, econômica e personalizada de consumir e compartilhar livros.
-
+Cidadãos, jornalistas, pesquisadores, órgãos de controle, organizações da sociedade civil e qualquer pessoa interessada em **transparência pública**, **gastos parlamentares** e **fiscalização do uso do dinheiro público**.
 
 ## 🎯 Objetivos Principais
 
-* Facilitar o gerenciamento e acompanhamento de leituras atuais, concluídas e desejadas.
-* Reunir sugestões de leitura baseadas no perfil do usuário e nos livros já lidos.
-* Conectar leitores que queiram trocar, vender ou emprestar livros físicos.
-* Estimular o consumo consciente e colaborativo de livros por meio da reutilização e compartilhamento.
-* Promover a confiança entre usuários por meio de um sistema de reputação.
+* 📊 Facilitar o acesso e a compreensão dos dados de gastos parlamentares.
+* 🔎 Promover a transparência e o controle social dos recursos públicos.
+* 🗺️ Disponibilizar análises visuais e geográficas sobre os locais e tipos de gastos.
+* 👤 Possibilitar o acompanhamento de políticos específicos ao longo do tempo.
+* 📂 Estimular o uso de dados abertos para fins jornalísticos, educacionais e sociais.
 
 
-### 🛠️ Funcionalidades Esperadas
+## ⚙️ Funcionalidades Esperadas (Requisitos Funcionais)
 
-* **Gerenciador de Leituras**: controle de livros lidos, em andamento, pausados e desejados.
-* **Sistema de Recomendação**: sugestões com base em preferências e histórico de leitura.
-* **Catálogo com APIs Externas**: integração com Google Books e OpenLibrary para busca e informações.
-* **Conexões de Troca/Venda/Empréstimo**: usuários podem anunciar livros e negociar diretamente.
-* **Sistema de Avaliação**: reputação de usuários com base nas interações realizadas.
-* **Favoritos e Anotações**: salvar livros de interesse e registrar comentários pessoais.
-* **Perfil Personalizado**: cada usuário tem seu perfil público com interesses, histórico e avaliações.
-* **Notificações e Propostas**: alertas sobre novas propostas ou interesse em seus livros.
-
+* 📥 **Importação e Armazenamento de Dados Públicos**: coleta automatizada ou manual dos dados de despesas parlamentares.
+* 📋 **Painel de Visualização por Parlamentar**: resumo e detalhes das despesas por deputado.
+* 🧮 **Filtros por Tipo de Gasto, Período e Região**: navegação dinâmica e filtragem dos dados.
+* 📍 **Geolocalização de Gastos**: exibição dos locais onde ocorreram os gastos, com mapas interativos.
+* 📈 **Relatórios e Comparações**: gráficos analíticos com comparações por parlamentar, categoria de despesa, região ou período.
+* 🥇 **Ranking de Gastos**: permitir listar dos deputados que mais gastaram.
+* ⭐ **Sistema de Seguimento de Parlamentares**: usuários podem "seguir" deputados e receber notificações de novos gastos declarados.
+* 👥 **Área do Usuário**: cada cidadão pode criar um perfil, salvar filtros personalizados e acompanhar os políticos de seu interesse.
 
 ## 🚀 Início Rápido
 

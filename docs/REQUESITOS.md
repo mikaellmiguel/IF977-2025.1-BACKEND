@@ -1,150 +1,120 @@
-#  Elicitação e Levantamento de Requisitos – RedeLeitura
+# 📋 Elicitação e Levantamento de Requisitos – FiscalizaDeputado
 
-> **Observação:** Este é um levantamento inicial dos requisitos do projeto **RedeLeitura**. Os requisitos podem ser ajustados ou modificados conforme o desenvolvimento do projeto avança e novas necessidades forem identificadas.
-
----
-
-##  Requisitos Funcionais
+> **Observação:** Este é um levantamento inicial dos requisitos do projeto **FiscalizaDeputado**. Os requisitos poderão ser ajustados conforme o projeto evolui e novas funcionalidades forem identificadas.
 
 ---
 
-### História 1: Gerenciar Biblioteca Pessoal
+## ✅ Requisitos Funcionais
+
+---
+
+### História 1: Consultar Gastos de um Deputado
 
 ```txt
-Como usuário,  
-Eu gostaria de adicionar e organizar livros na minha biblioteca pessoal  
-Para acompanhar minhas leituras.
+Como cidadão,  
+Eu quero consultar os gastos de um deputado federal específico  
+Para saber como ele está utilizando a cota parlamentar.
 ```
 
 **Critérios de Aceitação**:
 
-* O usuário deve poder adicionar livros às categorias: "Lido", "Lendo", "Quero Ler".
-* O sistema deve permitir edição e remoção dos livros da biblioteca pessoal.
-* Os dados do livro (título, autor, capa, descrição) devem ser obtidos automaticamente via API externa.
+* O sistema deve permitir buscar deputados pelo nome, partido ou estado.
+* Os dados devem ser obtidos da API da Câmara dos Deputados (Câmara Aberta).
+* A exibição deve conter: tipo de despesa, valor, data, fornecedor e localização.
 
 ---
 
-### História 2: Recomendação de Livros
+### História 2: Visualizar Gastos com Geolocalização
 
 ```txt
-Como usuário,  
-Eu gostaria de receber recomendações de livros com base no meu perfil de leitura  
-Para descobrir novas obras de meu interesse.
+Como cidadão,  
+Eu quero visualizar no mapa onde ocorreram os gastos dos deputados  
+Para entender melhor o destino regional dos recursos públicos.
 ```
 
 **Critérios de Aceitação**:
 
-* O sistema deve gerar sugestões com base no histórico de leitura, gêneros e autores mais lidos.
-* As recomendações devem vir de uma base de dados como Google Books ou OpenLibrary.
-* Deve ser possível indicar que o usuário gostou ou não de uma recomendação para refinar o perfil.
+* O sistema deve exibir um mapa interativo com marcadores por cidade/estado.
+* Cada marcador deve mostrar os gastos agregados naquela localidade.
+* Deve haver filtros por deputado, tipo de despesa, partido e período.
 
 ---
 
-### História 3: Anunciar Livro para Venda ou Empréstimo
+### História 3: Seguir Deputados de Interesse
 
 ```txt
-Como usuário,  
-Eu quero poder anunciar um livro físico para venda ou empréstimo  
-Para que outros usuários interessados possam encontrá-lo.
+Como cidadão,  
+Eu quero seguir deputados específicos  
+Para receber atualizações sobre seus novos gastos declarados.
 ```
 
 **Critérios de Aceitação**:
 
-* O usuário pode registrar um livro com título, estado de conservação, localização, e tipo (venda/empréstimo).
-* O anúncio deve ser visível publicamente com opção de contato.
-* O sistema deve permitir editar ou remover o anúncio.
+* O sistema deve permitir que o usuário marque deputados como “favoritos”.
+* O usuário deve receber notificações sobre novos gastos desses deputados.
+* Os deputados seguidos devem aparecer em uma seção dedicada do perfil do usuário.
 
 ---
 
-### História 4: Buscar Trocas ou Compras de Livro
+### História 4: Comparar Gastos entre Deputados
 
 ```txt
-Como usuário,  
-Eu quero buscar livros disponíveis para troca/compra por outros usuários  
-Para comprar ou emprestar livros de meu interesse.
+Como cidadão,  
+Eu quero comparar os gastos entre diferentes deputados  
+Para avaliar padrões e detectar excessos.
 ```
 
 **Critérios de Aceitação**:
 
-* O sistema deve permitir busca e filtro por título, autor, localização, tipo de anúncio.
-* Deve ser possível enviar uma proposta diretamente ao dono do livro.
-* O sistema deve notificar o usuário quando houver propostas recebidas.
+* O sistema deve permitir selecionar dois ou mais deputados.
+* Deve exibir gráficos comparativos por período, tipo de despesa e total acumulado.
+* Deve ser possível exportar os dados em CSV ou PDF.
 
 ---
 
-### História 5: Avaliar Trocas/Empréstimos e Usuários
+### História 5: Ranking de Gastos Parlamentares
 
 ```txt
-Como usuário,  
-Eu quero avaliar a experiência com outro usuário após uma transação (troca/empréstimo) 
-Para contribuir com a reputação da comunidade.
+Como cidadão,  
+Eu quero ver o ranking de deputados que mais gastam  
+Para identificar quais utilizam mais recursos públicos.
 ```
 
 **Critérios de Aceitação**:
 
-* Após concluir uma troca, venda ou empréstimo, ambos os usuários devem poder avaliar a experiência.
-* A avaliação deve incluir nota (1 a 5) e comentário opcional.
-* A média das avaliações deve ser exibida no perfil do usuário.
+* O sistema deve listar os deputados com maiores gastos totais em um período selecionado.
+* Deve ser possível ordenar por estado, partido, tipo de gasto e data.
+* Os dados devem ser atualizados automaticamente com base na API.
 
 ---
 
-### História 6: Cadastro e Login com Perfil Pessoal
+### História 6: Criar Conta e Personalizar Experiência
 
 ```txt
-Como usuário,  
-Eu quero criar uma conta com meu perfil de leitor  
-Para gerenciar minhas leituras e interações.
+Como cidadão,  
+Eu quero criar uma conta pessoal  
+Para seguir deputados, salvar comparações e receber notificações.
 ```
 
 **Critérios de Aceitação**:
 
-* Deve haver opção de login com email/senha ou com contas sociais (Google).
-* O perfil deve conter: nome, nome de usuário, foto, localização e bio.
-* As preferências de leitura devem ser definidas no perfil (ex: gêneros favoritos).
+* Cadastro via email/senha ou autenticação Google.
+* O perfil deve conter nome, e-mail e preferências de acompanhamento.
+* O sistema deve permitir ativar/desativar notificações por deputado ou tipo de gasto.
 
 ---
 
-### História 7: Comentar Livros
-
-```txt
-Como usuário,  
-Eu quero comentar e avaliar os livros que li  
-Para registrar minhas impressões e ajudar outros leitores.
-```
-
-**Critérios de Aceitação**:
-
-* O sistema deve permitir adicionar uma avaliação com nota (1 a 5) e comentário.
-* Os comentários devem ser visíveis na página do livro.
-* Comentários devem aparecer em ordem cronológica e suportar até 3000 caracteres.
-
-
-
-### História 8: Visualizar Opções de Compra Digitais
-
-```txt
-Como usuário,  
-Eu quero visualizar opções de compra digital (e-book ou audiobook) dos livros recomendados  
-Para que eu possa adquiri-los mesmo que não estejam disponíveis fisicamente na plataforma.
-```
-**Critérios de Aceitação:**
-
-* Para cada livro recomendado ou buscado, o sistema deve exibir links de compra digital, quando disponíveis.
-* Os links podem vir de APIs públicas como Google Books (Google Play), Amazon, Estante Virtual ou links configurados manualmente.
-* Deve haver uma distinção clara entre os formatos disponíveis:  físico /  e-book /  audiobook.
-* O clique no link de compra digital deve redirecionar o usuário para a loja externa em uma nova aba.
-
-##  Requisitos Não Funcionais
+## ⚙️ Requisitos Não Funcionais
 
 ---
 
-### Interface Intuitiva e Responsiva
+### Interface Responsiva e Acessível
 
 **Critérios de Aceitação**:
 
-* Design responsivo, adaptável a desktop e dispositivos móveis.
-* Interface clara com destaque para botões de ações importantes.
-* Mensagens de erro devem ser amigáveis e informativas.
+* Design compatível com desktop e mobile (responsivo).
+* Interface clara, com foco em dados e navegação acessível.
+* Ícones e gráficos com legendas e contraste adequado.
 
 ---
 
@@ -152,10 +122,19 @@ Para que eu possa adquiri-los mesmo que não estejam disponíveis fisicamente na
 
 **Critérios de Aceitação**:
 
-* Criptografia de senhas no cadastro e login.
-* Ocultar senha durante digitação.
-* Validação de senha forte (mínimo de 8 caracteres).
-* Autenticação segura com APIs sociais (Google).
+* Senhas criptografadas no banco de dados.
+* Validação de senha forte (mínimo 8 caracteres).
+* Autenticação segura com tokens (JWT) e OAuth para login social.
+
+---
+
+### Performance e Disponibilidade
+
+**Critérios de Aceitação**:
+
+* O carregamento de páginas com grandes volumes de dados deve ocorrer em até 3 segundos.
+* O sistema deve suportar acesso simultâneo de centenas de usuários sem queda de desempenho.
+* Os dados da API da Câmara devem ser cacheados quando possível para reduzir tempo de resposta.
 
 ---
 
@@ -163,5 +142,7 @@ Para que eu possa adquiri-los mesmo que não estejam disponíveis fisicamente na
 
 **Critérios de Aceitação**:
 
-* Compatível com os navegadores modernos: Chrome, Firefox, Safari e Edge.
-* Funcionalidades principais devem estar disponíveis em qualquer dispositivo moderno.
+* Compatível com navegadores modernos: Chrome, Firefox, Safari e Edge.
+* As funcionalidades principais devem funcionar em todos os principais sistemas operacionais.
+
+
