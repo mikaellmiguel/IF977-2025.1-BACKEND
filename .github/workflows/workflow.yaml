@@ -1,0 +1,30 @@
+name: Continuos Integration
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+jobs: 
+  continuos-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar o repositório
+        uses: actions/checkout@v2
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20.
+
+      - name: Instalar dependências
+        run: npm install
+        working-directory: backend
+
+      - name: Executar testes
+        run: npm test
+        working-directory: backend

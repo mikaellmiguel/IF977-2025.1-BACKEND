@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "dev": "nodemon ./src/server.js",
     "start": "node ./src/server.js"
   },
@@ -18,6 +18,7 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "jest": "^30.0.2",
     "nodemon": "^3.1.10"
   }
 }
