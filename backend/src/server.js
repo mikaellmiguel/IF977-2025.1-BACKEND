@@ -1,5 +1,8 @@
 require('dotenv').config();
+require("express-async-errors");
+
 const express = require('express');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 app.use(express.json());
@@ -10,6 +13,8 @@ app.get('/', (req, res) => {
     message: 'Bem vindo ao servidor Express!',
   });
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
