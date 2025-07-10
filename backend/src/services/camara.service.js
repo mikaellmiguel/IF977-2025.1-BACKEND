@@ -23,7 +23,24 @@ async function getDetailsDeputadoById(id) {
 
         const dados = response.data.dados;
 
-        return dados;
+        return {
+            id: dados.id,
+            nome_civel: dados.nomeCivil,
+            nome: dados.ultimoStatus.nome,
+            partido: dados.ultimoStatus.siglaPartido,
+            sigla_uf: dados.ultimoStatus.siglaUf,
+            email: dados.ultimoStatus.gabinete.email || null,
+            telefone: dados.ultimoStatus.gabinete.telefone || null,
+            url_foto: dados.ultimoStatus.urlFoto || null,
+            gabinete: {
+                nome: dados.ultimoStatus.gabinete.nome|| null,
+                predio: dados.ultimoStatus.gabinete.predio || null,
+                sala: dados.ultimoStatus.gabinete.sala || null,
+            },
+            redes_social: dados.redeSocial || [],
+            escolaridade: dados.escolaridade,
+            data_nascimento: dados.dataNascimento 
+        };
 
     } 
     catch (error) {
