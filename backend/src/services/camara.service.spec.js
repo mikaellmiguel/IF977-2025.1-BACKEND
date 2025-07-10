@@ -71,4 +71,33 @@ describe('getDetailsDeputadoById', () => {
       data_nascimento: '1972-04-04',
     });
   });
+
+  it('deve lançar erro para ID inválido', async () => {
+    try {
+      await getDetailsDeputadoById('abc');
+    } catch (err) {
+      expect(err).toBeInstanceOf(AppError);
+      expect(err.message).toBe('ID do deputado inválido');
+    }
+  });
+
+  it('deve lançar erro 404 se deputado não encontrado', async () => {
+    mock.onGet('https://dadosabertos.camara.leg.br/api/v2/deputados/999999').reply(404, {});
+    try {
+      await getDetailsDeputadoById(999999);
+    } catch (err) {
+      expect(err).toBeInstanceOf(AppError);
+      expect(err.message).toBe('Deputado não encontrado');
+    }
+  });
+
+  it('deve lançar erro se resposta da API for inválida', async () => {
+    mock.onGet('https://dadosabertos.camara.leg.br/api/v2/deputados/202151').reply(200, {});
+    try {
+      await getDetailsDeputadoById(202151);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+      expect(err.message).toBe('ERROR (services/camara.service): Erro ao buscar deputado 202151');
+    }
+  });
 });
