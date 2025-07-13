@@ -129,5 +129,19 @@ describe('DeputadosController', () => {
                 expect(error.statusCode).toBe(400);
             }
         });
+
+        it('deve lançar erro se ocorer na consulta ao banco de dados', async () => {
+            knexMockFn("deputados").count.mockImplementation(() => {
+                throw new Error('tabela não encontrada');
+            });
+
+            const request = { query: { limit: '2', offset: '0' } };
+            
+            try {
+                await controller.index(request, response);
+            } catch (error) {
+                expect(error.message).toBe('ERROR (DeputadosController/index): Erro ao buscar deputados: tabela não encontrada');
+            }
+        });
     });
 });
