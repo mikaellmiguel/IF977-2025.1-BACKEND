@@ -94,5 +94,17 @@ describe('DeputadosController', () => {
                 offset: 0
             });
         });
+
+        it('deve lançar erro se limit ou offset forem uma string não numérica', async () => {
+            const request = { query: { limit: 'abc', offset: '0' } };
+            
+            try {
+                await controller.index(request, response);
+            } catch (error) {
+                expect(error).toBeInstanceOf(AppError);
+                expect(error.message).toBe("Parâmetros 'limit' e 'offset' devem ser números inteiros positivos");
+                expect(error.statusCode).toBe(400);
+            }
+        });
     });
 });
