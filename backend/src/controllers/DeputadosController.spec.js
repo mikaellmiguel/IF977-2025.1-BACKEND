@@ -106,5 +106,28 @@ describe('DeputadosController', () => {
                 expect(error.statusCode).toBe(400);
             }
         });
+
+        it('deve lançar erro se limit ou offset forem negativos', async () => {
+            const request = { query: { limit: '10', offset: '-1' } };
+            
+            try {
+                await controller.index(request, response);
+            } catch (error) {
+                expect(error).toBeInstanceOf(AppError);
+                expect(error.message).toBe("Parâmetros 'limit' e 'offset' devem ser números inteiros positivos");
+                expect(error.statusCode).toBe(400);
+            }
+        });
+
+        it('deve lançar erro se limit ou offser não forem inteiros', async () => {
+            const request = { query: { limit: '2.5', offset: '0' } };
+            try {
+                await controller.index(request, response);
+            } catch (error) {
+                expect(error).toBeInstanceOf(AppError);
+                expect(error.message).toBe("Parâmetros 'limit' e 'offset' devem ser números inteiros positivos");
+                expect(error.statusCode).toBe(400);
+            }
+        });
     });
 });
