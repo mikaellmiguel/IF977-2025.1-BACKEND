@@ -13,6 +13,26 @@ class DeputadosController {
         if(!/^\d+$/.test(limit) || !/^\d+$/.test(offset)) {
             throw new AppError("Parâmetros 'limit' e 'offset' devem ser números inteiros positivos", 400);
         }
+
+        try {
+            const {total} = await knex("deputados").count('* as total').first();
+
+            const deputados = await knex("deputados")
+                                    .orderBy("nome")
+                                    .limit(limit)
+                                    .offset(offset)
+                                    .select("id", "nome", "partido", "sigla_uf", "url_foto", "email", "data_nascimento");
+            
+            return response.json({
+                dados: deputados,
+                total: total,
+                limit: parseInt(limit),
+                offset: parseInt(offset)
+            });
+        }
+        catch (error) {
+            throw new Error(`ERROR (DeputadosController/index): Erro ao buscar deputados: ${error.message}`);
+        }
     }
     
     async show(request, response) {
