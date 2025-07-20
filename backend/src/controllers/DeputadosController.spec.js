@@ -1,6 +1,7 @@
 const DeputadosController = require('./DeputadosController');
 const { getDetailsDeputadoById } = require('../services/camara.service');
 const AppError = require('../utils/AppError');
+const { distinct } = require('../database/knex');
 
 jest.mock('../services/camara.service');
 
@@ -11,8 +12,14 @@ const mockKnexInstance = {
     limit: jest.fn().mockReturnThis(),
     offset: jest.fn().mockReturnThis(),
     select: jest.fn(),
-    first: jest.fn()
+    first: jest.fn(),
+    distinct: jest.fn()
 };
+
+// Considerando que erros de validação de partido e sigla de UF são tratados em métodos separados,
+jest.mock('../utils/validarPartido', () => jest.fn(async () => true));
+jest.mock('../utils/validarSiglaUf', () => jest.fn(async () => true));
+
 
 jest.mock("../database/knex", () => jest.fn((tableName) => mockKnexInstance)) ;
 
@@ -143,5 +150,118 @@ describe('DeputadosController', () => {
                 expect(error.message).toBe('ERROR (DeputadosController/index): Erro ao buscar deputados: tabela não encontrada');
             }
         });
+    });
+
+    describe("Metodo search", () => {
+
+        let controller;
+        let response;
+        beforeEach(() => {
+            controller = new DeputadosController();
+            response = { json: jest.fn() };
+            jest.clearAllMocks();
+        });
+
+        it('deve retornar deputados filtrando por nome', async () => {
+            mockKnexInstance.orderBy.mockReturnThis();
+            mockKnexInstance.where = jest.fn().mockReturnThis();
+            mockKnexInstance.select.mockResolvedValue([
+                { id: 1, nome: 'Deputado 1', partido: 'ABC', sigla_uf: 'PE' }
+            ]);
+            const request = { query: { name: 'Deputado 1' } };
+            await controller.search(request, response);
+            expect(mockKnexInstance.where).toHaveBeenCalledWith('nome', 'like', '%Deputado 1%');
+            expect(response.json).toHaveBeenCalledWith({
+                dados: [ { id: 1, nome: 'Deputado 1', partido: 'ABC', sigla_uf: 'PE' } ],
+                total: 1,
+                limit: 20,
+                offset: 0
+            });
+        });
+
+        it('deve lançar erro se limit ou offset forem inválidos', async () => {
+            const request = { query: { limit: 'abc', offset: '0' } };
+            try {
+                await controller.search(request, response);
+            } catch (err) {
+                expect(err).toBeInstanceOf(AppError);
+                expect(err.message).toBe("Parâmetros 'limit' e 'offset' devem ser números inteiros positivos");
+                expect(err.statusCode).toBe(400);
+            }
+        });
+
+        it('deve filtrar por partido e chamar validarPartido', async () => {
+            mockKnexInstance.orderBy.mockReturnThis();
+            mockKnexInstance.where = jest.fn().mockReturnThis();
+            mockKnexInstance.select.mockResolvedValue([
+                { id: 2, nome: 'Deputado 2', partido: 'PT', sigla_uf: 'PE' }
+            ]);
+
+            mockKnexInstance.select.mockImplementation(() => Promise.resolve([
+                { id: 2, nome: 'Deputado 2', partido: 'PT', sigla_uf: 'PE' }
+            ]));
+            const request = { query: { partido: 'PT' } };
+            await controller.search(request, response);
+            expect(response.json).toHaveBeenCalledWith({
+                dados: [ { id: 2, nome: 'Deputado 2', partido: 'PT', sigla_uf: 'PE' } ],
+                total: 1,
+                limit: 20,
+                offset: 0
+            });
+        });
+
+        it('deve filtrar por uf e chamar validarSiglaUf', async () => {
+            mockKnexInstance.orderBy.mockReturnThis();
+            mockKnexInstance.where = jest.fn().mockReturnThis();
+            mockKnexInstance.select.mockResolvedValue([
+                { id: 3, nome: 'Deputado 3', partido: 'PSDB', sigla_uf: 'SP' }
+            ]);
+            const request = { query: { uf: 'SP' } };
+            await controller.search(request, response);
+            expect(response.json).toHaveBeenCalledWith({
+                dados: [ { id: 3, nome: 'Deputado 3', partido: 'PSDB', sigla_uf: 'SP' } ],
+                total: 1,
+                limit: 20,
+                offset: 0
+            });
+        });
+
+        it('deve filtrar por nome, partido e uf juntos', async () => {
+            mockKnexInstance.orderBy.mockReturnThis();
+            mockKnexInstance.where = jest.fn().mockReturnThis();
+            mockKnexInstance.select.mockResolvedValue([
+                { id: 4, nome: 'Deputado 4', partido: 'PT', sigla_uf: 'PE' }
+            ]);
+            const request = { query: { name: 'Deputado 4', partido: 'PT', uf: 'PE' } };
+            await controller.search(request, response);
+            expect(response.json).toHaveBeenCalledWith({
+                dados: [ { id: 4, nome: 'Deputado 4', partido: 'PT', sigla_uf: 'PE' } ],
+                total: 1,
+                limit: 20,
+                offset: 0
+            });
+        });
+
+        it('deve retornar todos os deputados se nenhum filtro for aplicado', async () => {
+            mockKnexInstance.orderBy.mockReturnThis();
+            mockKnexInstance.select.mockResolvedValue([
+                { id: 5, nome: 'Deputado 1', partido: 'PMDB', sigla_uf: 'RJ' }, 
+                { id: 6, nome: 'Deputado 2', partido: 'PSDB', sigla_uf: 'SP' },
+                { id: 7, nome: 'Deputado 3', partido: 'PT', sigla_uf: 'PE' }
+            ]);
+            const request = { query: {} };
+            await controller.search(request, response);
+            expect(response.json).toHaveBeenCalledWith({
+                dados: [
+                    { id: 5, nome: 'Deputado 1', partido: 'PMDB', sigla_uf: 'RJ' },
+                    { id: 6, nome: 'Deputado 2', partido: 'PSDB', sigla_uf: 'SP' },
+                    { id: 7, nome: 'Deputado 3', partido: 'PT', sigla_uf: 'PE' }
+                ],
+                total: 3,
+                limit: 20,
+                offset: 0
+            });
+        });
+
     });
 });
