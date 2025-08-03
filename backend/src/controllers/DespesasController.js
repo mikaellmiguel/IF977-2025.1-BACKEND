@@ -3,6 +3,7 @@ const knex = require('../database/knex');
 const AppError = require('../utils/AppError');
 const validarSiglaUf = require('../utils/validarSiglaUf');
 const { validarLimitOffset, validarValores, validarTipo } = require('../utils/validarParametrosDespesas');
+const buildRankingQuery = require('../utils/buildRankingQuery');
 
 class DespesasController {
 
@@ -36,35 +37,20 @@ class DespesasController {
         });
     }
 
-     async ranking(request, response) {
 
+    async ranking(request, response) {
         const { limit, offset } = validarLimitOffset(request.query.limit, request.query.offset);
-
-        const ranking = await knex("deputados")
-            .join("despesas", "despesas.id_deputado", "deputados.id")
-            .select(
-                "deputados.id as id",
-                "deputados.nome as nome",
-                "deputados.url_foto as url_foto",
-                "deputados.partido as partido",
-                "deputados.sigla_uf as uf",
-                knex.raw("SUM(despesas.valor_documento) as total_gasto")
-            )
-            .groupBy("deputados.id")
-            .orderBy("total_gasto", "desc")
-            .limit(limit)
-            .offset(offset);
-
-        // total de deputados com despesas
-        const { total } = await knex("despesas")
-            .join("deputados", "deputados.id", "despesas.id_deputado")
-            .countDistinct("deputados.id as total").first();
+        
+        const {dataQuery, totalQuery} = await buildRankingQuery(request.query, limit, offset);
+        
+        const ranking = await dataQuery;
+        const { total } = await totalQuery.first();
 
         response.json({
             dados: ranking,
             total: Number(total) ? Number(total) : 0,
-            limit:limit,
-            offset: offset
+            limit,
+            offset
         });
     }
 

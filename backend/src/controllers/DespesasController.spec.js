@@ -10,6 +10,7 @@ const {
 
 const validarIdDeputado = require('../utils/validarIdDeputado');
 const validarSiglaUf = require('../utils/validarSiglaUf');
+const buildRankingQuery = require('../utils/buildRankingQuery');
 
 
 // Realizando o mock do knex e das funções de validação
@@ -33,6 +34,7 @@ jest.mock('../utils/validarParametrosDespesas', () => ({
     validarValores: jest.fn(),
     validarTipo: jest.fn(),
 }));
+jest.mock('../utils/buildRankingQuery', () => jest.fn());
 
 describe('DespesasController', () => {
     describe("Método index", () => {
@@ -166,6 +168,115 @@ describe('DespesasController', () => {
             expect(validarLimitOffset).toHaveBeenCalledWith('10', '0');
             expect(validarValores).toHaveBeenCalledWith(undefined, undefined);
             expect(validarTipo).toHaveBeenCalledWith(undefined);
+        });
+    });
+
+    describe("Método ranking", () => {
+        let req, res;
+
+        beforeEach(() => {
+            req = {
+                query: {
+                    limit: '5',
+                    offset: '10',
+                    uf: 'SP',
+                    partido: 'PT',
+                    mes: '3',
+                    ano: '2023',
+                    ordem: 'desc',
+                }
+            };
+
+            res = {
+                json: jest.fn()
+            };
+
+            validarLimitOffset.mockReturnValue({ limit: 5, offset: 10 });
+        });
+
+        it('deve retornar o ranking corretamente com total válido', async () => {
+            const mockRanking = [
+                { id: 1, nome: 'Deputado A', total_gasto: 1000 },
+                { id: 2, nome: 'Deputado B', total_gasto: 800 }
+            ];
+
+            const mockDataQuery = Promise.resolve(mockRanking);
+            const mockTotalQuery = {
+                first: jest.fn().mockResolvedValue({ total: 2 })
+            };
+
+            buildRankingQuery.mockResolvedValue({
+                dataQuery: mockDataQuery,
+                totalQuery: mockTotalQuery
+            });
+
+            const controller = new DespesasController();
+            await controller.ranking(req, res);
+
+            expect(validarLimitOffset).toHaveBeenCalledWith('5', '10');
+            expect(buildRankingQuery).toHaveBeenCalledWith(req.query, 5, 10);
+            expect(mockTotalQuery.first).toHaveBeenCalled();
+
+            expect(res.json).toHaveBeenCalledWith({
+                dados: mockRanking,
+                total: 2,
+                limit: 5,
+                offset: 10
+            });
+        });
+
+        it('deve retornar total como 0 se não vier no banco', async () => {
+            const mockDataQuery = Promise.resolve([]);
+            const mockTotalQuery = {
+                first: jest.fn().mockResolvedValue({})
+            };
+
+            buildRankingQuery.mockResolvedValue({
+                dataQuery: mockDataQuery,
+                totalQuery: mockTotalQuery
+            });
+
+            const controller = new DespesasController();
+            await controller.ranking(req, res);
+
+            expect(res.json).toHaveBeenCalledWith({
+                dados: [],
+                total: 0,
+                limit: 5,
+                offset: 10
+            });
+        });
+
+        it('deve retornar total como 0 se vier total inválido', async () => {
+            const mockDataQuery = Promise.resolve([]);
+            const mockTotalQuery = {
+                first: jest.fn().mockResolvedValue({ total: 'not-a-number' })
+            };
+
+            buildRankingQuery.mockResolvedValue({
+                dataQuery: mockDataQuery,
+                totalQuery: mockTotalQuery
+            });
+
+            const controller = new DespesasController();
+            await controller.ranking(req, res);
+
+            expect(res.json).toHaveBeenCalledWith({
+                dados: [],
+                total: 0,
+                limit: 5,
+                offset: 10
+            });
+        });
+
+        it('deve lidar com erro na execução da query', async () => {
+            const error = new Error('Erro no banco');
+            buildRankingQuery.mockRejectedValue(error);
+
+            const next = jest.fn(); // caso você esteja usando middleware de erro
+
+            const controller = new DespesasController();
+            await expect(controller.ranking(req, res)).rejects.toThrow('Erro no banco');
         });
     });
 });
