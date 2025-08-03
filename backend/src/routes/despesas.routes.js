@@ -5,5 +5,6 @@ const despesasRoutes = Router();
 const despesasController = new DespesasController();
 
 despesasRoutes.get("/deputados/:deputado_id", despesasController.index);
+despesasRoutes.get("/ranking", despesasController.ranking);
 
 module.exports = despesasRoutes;
