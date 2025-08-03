@@ -8,7 +8,7 @@ function validarLimitOffset(limit, offset) {
     if (!/^\d+$/.test(limit) || !/^\d+$/.test(offset)) {
         throw new AppError("Parâmetros 'limit' e 'offset' devem ser números inteiros positivos", 400);
     }
-    return true;
+    return { limit: Number(limit), offset: Number(offset) };
 }
 
 function validarValores(valor_min, valor_max) {
