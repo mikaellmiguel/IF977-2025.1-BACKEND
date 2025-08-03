@@ -14,6 +14,7 @@ const validarSiglaUf = require('../utils/validarSiglaUf');
 
 // Realizando o mock do knex e das funções de validação
 const mockKnexInstance = {
+    select: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     limit: jest.fn().mockReturnThis(),
@@ -72,6 +73,12 @@ describe('DespesasController', () => {
                 }
             ]));
             validarSiglaUf.mockResolvedValue(true);
+
+            // Mock para validarLimitOffset: sempre retorna { limit, offset }
+            validarLimitOffset.mockImplementation((limit, offset) => ({
+                limit: limit ? Number(limit) : 10,
+                offset: offset ? Number(offset) : 0
+            }));
         });
 
         it('deve retornar despesas filtradas com sucesso', async () => {
@@ -110,8 +117,8 @@ describe('DespesasController', () => {
         it('deve aplicar paginação corretamente', async () => {
             const controller = new DespesasController();
             await controller.index(request, response);
-            expect(mockKnexInstance.limit).toHaveBeenCalledWith('10');
-            expect(mockKnexInstance.offset).toHaveBeenCalledWith('0');
+            expect(mockKnexInstance.limit).toHaveBeenCalledWith(10);
+            expect(mockKnexInstance.offset).toHaveBeenCalledWith(0);
         });
 
         it('deve lançar erro se validarLimitOffset lançar', async () => {
@@ -137,6 +144,10 @@ describe('DespesasController', () => {
 
         it('deve passar todos os filtros para o query', async () => {
             request.query = { limit: '5', offset: '1', valor_min: '100', valor_max: '200', tipo: 'alimentação', uf: 'PE' };
+            validarLimitOffset.mockImplementation((limit, offset) => ({
+                limit: limit ? Number(limit) : 10,
+                offset: offset ? Number(offset) : 0
+            }));
             const controller = new DespesasController();
             await controller.index(request, response);
             expect(validarLimitOffset).toHaveBeenCalledWith('5', '1');
@@ -146,6 +157,10 @@ describe('DespesasController', () => {
 
         it('deve funcionar com filtros mínimos (apenas obrigatórios)', async () => {
             request.query = { limit: '10', offset: '0' };
+            validarLimitOffset.mockImplementation((limit, offset) => ({
+                limit: limit ? Number(limit) : 10,
+                offset: offset ? Number(offset) : 0
+            }));
             const controller = new DespesasController();
             await controller.index(request, response);
             expect(validarLimitOffset).toHaveBeenCalledWith('10', '0');
