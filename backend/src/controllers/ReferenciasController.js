@@ -21,6 +21,18 @@ class ReferenciasController {
         });
     }
 
+    async getReferenciasDeputados(request, response) {
+        let query = knex("deputados");
+
+        const estados = await query.clone().distinct("sigla_uf").pluck("sigla_uf");
+        const partidos = await query.clone().distinct("partido").pluck("partido");
+
+        return response.json({
+            estados: estados,
+            partidos: partidos
+        });
+    }
+
 }
 
 module.exports =  ReferenciasController;
