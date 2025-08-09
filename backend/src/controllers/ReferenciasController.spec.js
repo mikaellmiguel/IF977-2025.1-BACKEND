@@ -64,4 +64,32 @@ describe('ReferenciasController', () => {
             expect(res.json).toHaveBeenCalledWith({ tipos: [], estados: [] });
         });
     });
+
+    describe('getReferenciasDeputados', () => {
+        it('retorna estados e partidos dos deputados', async () => {
+            const estadosMock = ['PE', 'BA'];
+            const partidosMock = ['PT', 'PSDB'];
+            const query = { clone: jest.fn().mockReturnThis(), distinct: jest.fn().mockReturnThis(), pluck: jest.fn() };
+            query.distinct.mockImplementationOnce(() => query).mockImplementationOnce(() => query);
+            query.pluck.mockImplementationOnce(() => Promise.resolve(estadosMock)).mockImplementationOnce(() => Promise.resolve(partidosMock));
+            knex.mockReturnValue(query);
+
+            const req = {};
+            const res = mockResponse();
+            await ReferenciasController.prototype.getReferenciasDeputados(req, res);
+            expect(res.json).toHaveBeenCalledWith({ estados: estadosMock, partidos: partidosMock });
+        });
+
+        it('retorna arrays vazios se não houver deputados', async () => {
+            const query = { clone: jest.fn().mockReturnThis(), distinct: jest.fn().mockReturnThis(), pluck: jest.fn() };
+            query.distinct.mockImplementationOnce(() => query).mockImplementationOnce(() => query);
+            query.pluck.mockImplementationOnce(() => Promise.resolve([])).mockImplementationOnce(() => Promise.resolve([]));
+            knex.mockReturnValue(query);
+
+            const req = {};
+            const res = mockResponse();
+            await ReferenciasController.prototype.getReferenciasDeputados(req, res);
+            expect(res.json).toHaveBeenCalledWith({ estados: [], partidos: [] });
+        });
+    });
 });
