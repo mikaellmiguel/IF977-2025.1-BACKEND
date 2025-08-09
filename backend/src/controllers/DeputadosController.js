@@ -3,6 +3,7 @@ const {getDetailsDeputadoById} = require('../services/camara.service');
 const knex = require('../database/knex'); // Assuming you have a knex instance set up for database access
 const validarPartido = require('../utils/validarPartido');
 const validarSiglaUf = require('../utils/validarSiglaUf');
+const validarIdDeputado = require('../utils/validarIdDeputado');
 
 class DeputadosController {
 
@@ -39,6 +40,7 @@ class DeputadosController {
     
     async show(request, response) {
         const { id } = request.params;
+        await validarIdDeputado(id);
         const deputado = await getDetailsDeputadoById(id);
         return response.json(deputado);
     }
