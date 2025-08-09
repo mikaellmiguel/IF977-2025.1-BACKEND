@@ -10,10 +10,6 @@ const api = axios.create({
 
 async function getDetailsDeputadoById(id) {
 
-    if (!id || isNaN(Number(id))) {
-        throw new AppError('ID do deputado inválido', 400);
-    }
-
     try {
         const response = await api.get(`/${id}`);
         

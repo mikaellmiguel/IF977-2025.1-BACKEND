@@ -72,15 +72,6 @@ describe('getDetailsDeputadoById', () => {
     });
   });
 
-  it('deve lançar erro para ID inválido', async () => {
-    try {
-      await getDetailsDeputadoById('abc');
-    } catch (err) {
-      expect(err).toBeInstanceOf(AppError);
-      expect(err.message).toBe('ID do deputado inválido');
-    }
-  });
-
   it('deve lançar erro 404 se deputado não encontrado', async () => {
     mock.onGet('https://dadosabertos.camara.leg.br/api/v2/deputados/999999').reply(404, {});
     try {

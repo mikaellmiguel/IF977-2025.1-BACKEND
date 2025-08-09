@@ -13,12 +13,15 @@ const mockKnexInstance = {
     offset: jest.fn().mockReturnThis(),
     select: jest.fn(),
     first: jest.fn(),
-    distinct: jest.fn()
+    distinct: jest.fn(),
+    where: jest.fn().mockReturnThis()
 };
+
 
 // Considerando que erros de validação de partido e sigla de UF são tratados em métodos separados,
 jest.mock('../utils/validarPartido', () => jest.fn(async () => true));
 jest.mock('../utils/validarSiglaUf', () => jest.fn(async () => true));
+jest.mock('../utils/validarIdDeputado', () => jest.fn());
 
 
 jest.mock("../database/knex", () => jest.fn((tableName) => mockKnexInstance)) ;
@@ -29,6 +32,7 @@ describe('DeputadosController', () => {
     describe('Metodo show', () => {
 
         beforeEach(() => {
+            jest.clearAllMocks();
             request = { params: { id: '204555' } };
             response = { json: jest.fn() };
         });
@@ -36,14 +40,34 @@ describe('DeputadosController', () => {
         
         it('deve retornar os dados do deputado quando encontrado', async () => {
             const mockDeputado = { id: 204555, nome: 'Marcos Pereira' };
+            const validarIdDeputado = require('../utils/validarIdDeputado');
+            validarIdDeputado.mockResolvedValue(true);
             getDetailsDeputadoById.mockResolvedValue(mockDeputado);
             const controller = new DeputadosController();
             await controller.show(request, response);
+            expect(validarIdDeputado).toHaveBeenCalledWith('204555');
             expect(getDetailsDeputadoById).toHaveBeenCalledWith('204555');
             expect(response.json).toHaveBeenCalledWith(mockDeputado);
         });
 
+        it('deve propagar erro se validarIdDeputado lançar erro', async () => {
+            const validarIdDeputado = require('../utils/validarIdDeputado');
+            const error = new AppError('ID inválido', 400);
+            validarIdDeputado.mockRejectedValue(error);
+            getDetailsDeputadoById.mockResolvedValue({}); // Evita chamada real
+            const controller = new DeputadosController();
+            try {
+                await controller.show(request, response);
+            } catch (err) {
+                expect(err).toBeInstanceOf(AppError);
+                expect(err.message).toBe('ID inválido');
+                expect(err.statusCode).toBe(400);
+            }
+        });
+
         it('deve propagar erro se getDetailsDeputadoById lançar erro', async () => {
+            const validarIdDeputado = require('../utils/validarIdDeputado');
+            validarIdDeputado.mockResolvedValue(true);
             const error = new AppError('Deputado não encontrado', 400);
             getDetailsDeputadoById.mockRejectedValue(error);
             const controller = new DeputadosController();
