@@ -19,3 +19,45 @@ const mockResponse = () => {
   return res;
 };
 
+describe('AuthController', () => {
+  let controller;
+  beforeEach(() => {
+    controller = new AuthController();
+    jest.clearAllMocks();
+  });
+
+  describe('Método register', () => {
+    it('deve cadastrar usuário e enviar e-mail', async () => {
+      // Mock isolado para consulta de usuário
+      const localMockKnex = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue(null)
+      };
+      knex.mockReturnValueOnce(localMockKnex);
+    // Mock da transação como função chamável e métodos
+    const trxObj = function() { return trxObj; };
+    trxObj.insert = jest.fn().mockResolvedValue();
+    trxObj.commit = jest.fn();
+    trxObj.rollback = jest.fn();
+    trxObj.where = jest.fn().mockReturnThis();
+    knex.transaction = jest.fn().mockResolvedValue(trxObj);
+        const req = { body: { name: 'User', email: 'user@email.com', password: '123456' } };
+        const res = mockResponse();
+        await controller.register(req, res);
+        expect(trxObj.insert).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ tokenToVerify: expect.any(String) }));
+      });
+    it('deve lançar erro se dados obrigatórios faltarem', async () => {
+      const req = { body: { name: '', email: '', password: '' } };
+      const res = mockResponse();
+      await expect(controller.register(req, res)).rejects.toThrow(AppError);
+    });
+    it('deve lançar erro se e-mail já cadastrado', async () => {
+      knex.mockReturnValueOnce({ where: jest.fn().mockReturnValue({ first: jest.fn().mockResolvedValue({ email: 'user@email.com' }) }) });
+      const req = { body: { name: 'User', email: 'user@email.com', password: '123456' } };
+      const res = mockResponse();
+      await expect(controller.register(req, res)).rejects.toThrow(AppError);
+    });
+  });
+});
