@@ -149,11 +149,12 @@ class AuthController {
 
         const { secret, expiresIn } = authConfig.jwt;
         const token = sign({}, secret, {
-            subject: user.email,
+            subject: String(user.id),
             expiresIn
         });
 
-        return response.status(200).json({ token, user: { id: user.id, email: user.email, name: user.name } });
+        const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        return response.status(200).json({ token, expiresIn: expirationDate, user: { id: user.id, email: user.email, name: user.name } });
     }
 
     async verifyGoogleUser(request, response) {
@@ -194,7 +195,8 @@ class AuthController {
             expiresIn
         });
 
-        return response.status(200).json({token: tokenJwt, user: {id: user.id, email: user.email, name: user.name}});
+        const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        return response.status(200).json({token: tokenJwt, expiresIn: expirationDate, user: {id: user.id, email: user.email, name: user.name}});
     }
 }
 
