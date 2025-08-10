@@ -73,4 +73,54 @@ describe('UsersController', () => {
     expect(res.json).toHaveBeenCalled();
     });
     });
+
+    describe('delete', () => {
+        it('deve deletar usuário existente', async () => {
+            mockKnexInstance.first.mockResolvedValue({ id: 1, password: 'hash' });
+            mockKnexInstance.delete.mockResolvedValue(1);
+            bcrypt.compare.mockResolvedValue(true);
+            const req = { user: 1, body: { password: 'senha' } };
+            const res = mockResponse();
+            await controller.delete(req, res);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalled();
+            // O controller retorna apenas status 200 sem mensagem, então aceita undefined
+            expect(res.json.mock.calls[0][0]).toBeUndefined();
+        });
+        it('deve lançar erro se usuário não existir', async () => {
+            mockKnexInstance.first.mockResolvedValue(null);
+            const req = { user: 1, body: { password: 'senha' } };
+            const res = mockResponse();
+            await expect(controller.delete(req, res)).rejects.toThrow(AppError);
+        });
+        it('deve deletar usuário com senha correta', async () => {
+            mockKnexInstance.first.mockResolvedValue({ id: 1, password: 'hash' });
+            mockKnexInstance.delete.mockResolvedValue(1);
+            bcrypt.compare.mockResolvedValue(true);
+            const req = { user: 1, body: { password: 'senha' } };
+            const res = mockResponse();
+            await controller.delete(req, res);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0]).toBeUndefined();
+        });
+        it('deve lançar erro se senha não informada', async () => {
+            const req = { user: 1, body: {} };
+            const res = mockResponse();
+            await expect(controller.delete(req, res)).rejects.toThrow('Senha não informada');
+        });
+        it('deve lançar erro se usuário não encontrado', async () => {
+            mockKnexInstance.first.mockResolvedValue(null);
+            const req = { user: 1, body: { password: 'senha' } };
+            const res = mockResponse();
+            await expect(controller.delete(req, res)).rejects.toThrow('Usuário não encontrado');
+        });
+        it('deve lançar erro se senha estiver incorreta', async () => {
+            mockKnexInstance.first.mockResolvedValue({ id: 1, password: 'hash' });
+            bcrypt.compare.mockResolvedValue(false);
+            const req = { user: 1, body: { password: 'errada' } };
+            const res = mockResponse();
+            await expect(controller.delete(req, res)).rejects.toThrow(AppError);
+        });
+    });
 });
