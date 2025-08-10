@@ -14,6 +14,8 @@ async function validarIdDeputado(deputado_id) {
     if (!deputado) {
         throw new AppError(`Deputado com ID ${deputado_id} não encontrado`, 404);
     }
+
+    return true;
 }
 
 module.exports = validarIdDeputado;
