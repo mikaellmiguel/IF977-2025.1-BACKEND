@@ -59,7 +59,7 @@ class FollowsController {
         const {deputado_id} = request.params;
         const id = request.user;
 
-        const followExists = await knex('follows').where({user_id: i, deputado_id}).first();
+        const followExists = await knex('follows').where({user_id: id, deputado_id}).first();
 
         if(!followExists) throw new AppError("Você não está seguindo este deputado", 404);
 
