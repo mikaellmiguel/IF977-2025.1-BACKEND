@@ -142,4 +142,71 @@ describe('AuthController', () => {
       await expect(controller.resendVerificationCode(req, res)).rejects.toThrow('Usuário não encontrado');
     });
   });
+
+  describe('Método login', () => {
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('deve logar usuário verificado', async () => {
+      // Mock isolado para consulta de usuário
+      const localMockKnex = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue({ id: 1, email: 'user@email.com', name: 'User', password: 'hashed', is_verified: true })
+      };
+      knex.mockReturnValue(localMockKnex);
+      const bcrypt = require('bcryptjs');
+      const compareSpy = jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
+      const req = { body: { email: 'user@email.com', password: '123456' } };
+      const res = mockResponse();
+      await controller.login(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String), user: expect.objectContaining({ email: 'user@email.com' }) }));
+      compareSpy.mockRestore();
+    });
+
+    it('deve lançar erro se usuário não existir', async () => {
+      // Mock isolado para consulta de usuário inexistente
+      const localMockKnex = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue(undefined)
+      };
+      knex.mockReturnValue(localMockKnex);
+      const req = { body: { email: 'user@email.com', password: '123456' } };
+      const res = mockResponse();
+      await expect(controller.login(req, res)).rejects.toThrow('Usuário não encontrado');
+    });
+
+    it('deve lançar erro se usuário não verificado', async () => {
+      // Mock isolado para consulta de usuário não verificado
+      const localMockKnex = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue({ id: 1, email: 'user@email.com', name: 'User', password: 'hashed', is_verified: false })
+      };
+      knex.mockReturnValue(localMockKnex);
+      const req = { body: { email: 'user@email.com', password: '123456' } };
+      const res = mockResponse();
+      await expect(controller.login(req, res)).rejects.toThrow('Email não verificado');
+    });
+
+    it('deve lançar erro se senha estiver incorreta', async () => {
+      // Mock isolado para consulta de usuário verificado
+      const localMockKnex = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue({ id: 1, email: 'user@email.com', name: 'User', password: 'hashed', is_verified: true })
+      };
+      knex.mockReturnValue(localMockKnex);
+      jest.spyOn(require('bcryptjs'), 'compare').mockResolvedValue(false);
+      const req = { body: { email: 'user@email.com', password: 'senhaerrada' } };
+      const res = mockResponse();
+      await expect(controller.login(req, res)).rejects.toThrow('Senha incorreta');
+    });
+
+    it('deve lançar erro se faltar email ou senha', async () => {
+      const req = { body: { email: '', password: '' } };
+      const res = mockResponse();
+      await expect(controller.login(req, res)).rejects.toThrow(AppError);
+    });
+  });
 });
