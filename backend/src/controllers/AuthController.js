@@ -44,6 +44,29 @@ class AuthController {
             throw error;
         }
     }
+
+    async verifyEmail(request, response) {
+        const {email, verificationCode} = request.body;
+
+        if (!email || !verificationCode) {
+            throw new AppError("Email e código de verificação são obrigatórios", 400);
+        }
+
+        const user = await knex("users").where({ email }).first();
+
+        if(!user) throw new AppError("Usuário não encontrado", 404);
+        if(user.is_verified) throw new AppError("Email já verificado", 400);
+        if(user.verification_code !== verificationCode) throw new AppError("Código de verificação inválido", 400);
+        if(new Date(user.code_expiration) < new Date()) throw new AppError("Código de verificação expirado", 400);
+        
+        await knex("users").where({ email }).update({
+            is_verified: true,
+            verification_code: null,
+            code_expiration: null
+        });
+
+        return response.status(200).json();
+    }
 }
 
 module.exports = AuthController;
