@@ -155,6 +155,47 @@ class AuthController {
 
         return response.status(200).json({ token, user: { id: user.id, email: user.email, name: user.name } });
     }
+
+    async verifyGoogleUser(request, response) {
+        const {token} = request.body;
+
+        if (!token) throw new AppError("Token é obrigatório", 400);
+
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const {email, name, sub: googleId} = ticket.getPayload();
+
+        let user = await knex("users").where({ email }).first();
+
+        if (user) {
+            // Se já existe, vincula o google_id se ainda não estiver vinculado
+            if (!user.gooogle_id) {
+                await knex("users").where({ email }).update({ gooogle_id: googleId, is_verified: true });
+                user.gooogle_id = googleId;
+                user.is_verified = true;
+            }
+        } else {
+            // Se não existe, cria novo usuário já verificado
+            const [id] = await knex("users").insert({
+                name,
+                email,
+                gooogle_id: googleId,
+                is_verified: true
+            });
+            user = { id, name, email, gooogle_id: googleId, is_verified: true };
+        }
+
+        const { secret, expiresIn } = authConfig.jwt;
+        const tokenJwt = sign({}, secret, {
+            subject: String(user.id),
+            expiresIn
+        });
+
+        return response.status(200).json({token: tokenJwt, user: {id: user.id, email: user.email, name: user.name}});
+    }
 }
 
 module.exports = AuthController;
