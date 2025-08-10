@@ -40,9 +40,18 @@ class DeputadosController {
     
     async show(request, response) {
         const { id } = request.params;
+        const userId = request.user;
         await validarIdDeputado(id);
         const deputado = await getDetailsDeputadoById(id);
-        return response.json(deputado);
+
+        let isFollowing = false;
+        const follow = await knex('follows').where({ user_id: userId, deputado_id: id }).first();
+
+        isFollowing = !!follow;
+        return response.json({
+            ...deputado,
+            isFollowing
+        });
     }
 
     async search(request, response) {
@@ -60,11 +69,15 @@ class DeputadosController {
         if (partido && await validarPartido(partido)) query = query.where("partido", partido);
         if (uf && await validarSiglaUf(uf)) query = query.where("sigla_uf", uf);
 
-        const deputados = await query.select("id", "nome", "partido", "sigla_uf", "url_foto", "email", "data_nascimento");
+        const { total } = await query.clone().count('* as total').first();
+        const deputados = await query
+            .limit(limit)
+            .offset(offset)
+            .select("id", "nome", "partido", "sigla_uf", "url_foto", "email", "data_nascimento");
 
         return response.json({
             dados: deputados,
-            total: deputados.length,
+            total: total,
             limit: parseInt(limit),
             offset: parseInt(offset)
         });
