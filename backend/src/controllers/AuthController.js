@@ -67,6 +67,33 @@ class AuthController {
 
         return response.status(200).json();
     }
+
+    async confirmEmailToken (request, response) {
+
+        const token = request.query.token;
+
+        if (!token) throw new AppError("Token é obrigatório", 400);
+
+        const {secret} = authConfig.jwt;
+        
+        let email; 
+        try {
+            ({sub: email} = verify(token, secret));
+        } catch {
+            throw new AppError("Token inválido", 400);
+        }
+
+        if (!email) throw new AppError("Token inválido", 400);
+        const user = await knex("users").where({ email }).first();
+
+        if (!user) throw new AppError("Usuário não encontrado", 404);
+        
+        if(!user.is_verified) {
+            return response.json({email});
+        }
+
+        throw new AppError("Email já verificado", 400);
+    }
 }
 
 module.exports = AuthController;
