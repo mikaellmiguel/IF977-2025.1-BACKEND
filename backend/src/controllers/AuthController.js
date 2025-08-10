@@ -131,6 +131,30 @@ class AuthController {
             throw error;
         }
     }
+
+    async login(request, response) {
+        const {email, password} = request.body;
+
+        if (!email || !password) {
+            throw new AppError("Email e senha são obrigatórios", 400);
+        }
+
+        const user = await knex("users").where({ email }).first();
+
+        if(!user) throw new AppError("Usuário não encontrado", 404);
+        if(!user.is_verified) throw new AppError("Email não verificado", 403);
+
+        const isPasswordValid = await compare(password, user.password);
+        if(!isPasswordValid) throw new AppError("Senha incorreta", 401);
+
+        const { secret, expiresIn } = authConfig.jwt;
+        const token = sign({}, secret, {
+            subject: user.email,
+            expiresIn
+        });
+
+        return response.status(200).json({ token, user: { id: user.id, email: user.email, name: user.name } });
+    }
 }
 
 module.exports = AuthController;
