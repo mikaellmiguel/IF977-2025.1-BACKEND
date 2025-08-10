@@ -1,3 +1,4 @@
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
 const AuthController = require('./AuthController');
 const AppError = require('../utils/AppError');
 
