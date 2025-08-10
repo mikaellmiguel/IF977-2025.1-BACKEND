@@ -1,3 +1,16 @@
+// Mock da biblioteca google-auth-library
+jest.mock('google-auth-library', () => ({
+  OAuth2Client: jest.fn().mockImplementation(() => ({
+    verifyIdToken: jest.fn().mockImplementation(async () => ({
+      getPayload: () => ({
+        email: 'user@email.com',
+        name: 'User',
+        sub: 'googleid123'
+      })
+    }))
+  }))
+}));
+
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
 const AuthController = require('./AuthController');
 const AppError = require('../utils/AppError');
@@ -208,6 +221,50 @@ describe('AuthController', () => {
       const req = { body: { email: '', password: '' } };
       const res = mockResponse();
       await expect(controller.login(req, res)).rejects.toThrow(AppError);
+    });
+  });
+
+  describe('Método verifyGoogleUser', () => {
+    it('deve autenticar usuário Google novo e retornar token', async () => {
+      // Mock do ticket e do payload do Google
+      const mockPayload = { email: 'user@email.com', name: 'User', sub: 'googleid123' };
+      const mockTicket = { getPayload: jest.fn(() => mockPayload) };
+      const mockVerifyIdToken = jest.fn().mockResolvedValue(mockTicket);
+      // Mock do OAuth2Client
+      jest.mock('google-auth-library', () => ({ OAuth2Client: jest.fn(() => ({ verifyIdToken: mockVerifyIdToken })) }));
+
+      // Mock do knex para usuário inexistente e inserção
+      const knexMock = jest.fn()
+        .mockReturnValueOnce({ where: jest.fn().mockReturnThis(), first: jest.fn().mockResolvedValue(null) }) // busca usuário
+        .mockReturnValueOnce({ insert: jest.fn().mockResolvedValue([42]) }); // inserção
+      require('../database/knex').mockImplementation(knexMock);
+
+      const controller = new AuthController();
+      const req = { body: { token: 'tokenGoogle' } };
+      const res = mockResponse();
+      await controller.verifyGoogleUser(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String), user: expect.objectContaining({ email: 'user@email.com', name: 'User' }) }));
+    });
+
+    it('deve autenticar usuário Google já existente e retornar token', async () => {
+      const mockPayload = { email: 'user@email.com', name: 'User', sub: 'googleid123' };
+      const mockTicket = { getPayload: jest.fn(() => mockPayload) };
+      const mockVerifyIdToken = jest.fn().mockResolvedValue(mockTicket);
+      jest.mock('google-auth-library', () => ({ OAuth2Client: jest.fn(() => ({ verifyIdToken: mockVerifyIdToken })) }));
+
+      // Mock do knex para usuário existente
+      const userExistente = { id: 99, email: 'user@email.com', name: 'User', gooogle_id: 'googleid123', is_verified: true };
+      const knexMock = jest.fn()
+        .mockReturnValueOnce({ where: jest.fn().mockReturnThis(), first: jest.fn().mockResolvedValue(userExistente) });
+      require('../database/knex').mockImplementation(knexMock);
+
+      const controller = new AuthController();
+      const req = { body: { token: 'tokenGoogle' } };
+      const res = mockResponse();
+      await controller.verifyGoogleUser(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String), user: expect.objectContaining({ email: 'user@email.com', name: 'User' }) }));
     });
   });
 });
