@@ -10,7 +10,7 @@ class UsersController {
         const user = await knex('users').where('id', id).first();
 
         if(!user) throw new AppError("Usuário não encontrado");
-
+        
         if(email){
             const userWithUpdatedEmail = await knex('users').where('email', email).first();
             if(userWithUpdatedEmail && userWithUpdatedEmail.id !== id) throw new AppError("Este e-mail já está em uso");
@@ -31,6 +31,23 @@ class UsersController {
         await knex('users').where('id', id).update(user);
         return response.status(200).json({ message: 'Usuário atualizado com sucesso' });
     }
+
+    async delete(request, response) {
+        const {password} = request.body;
+        const id = request.user;
+
+        if(!password) throw new AppError("Senha não informada");
+        const user = await knex('users').where('id', id).first();
+        if(!user) throw new AppError("Usuário não encontrado");
+
+        const checkPasswordMatch = await compare(password, user.password);
+
+        if(!checkPasswordMatch) throw new AppError("Permissão Negada: Senha Incorreta", 401);
+
+        await knex('users').where('id', id).delete();
+        return response.status(200).json();
+    }
+
 }
 
 module.exports = UsersController;
