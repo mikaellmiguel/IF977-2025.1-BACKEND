@@ -94,6 +94,43 @@ class AuthController {
 
         throw new AppError("Email já verificado", 400);
     }
+
+    async resendVerificationCode(request, response) {
+        const {email} = request.body;
+
+        if(!email) {
+            throw new AppError("Email é obrigatório", 400);
+        }
+
+        const user = await knex("users").where({ email }).first();
+
+        if(!user) throw new AppError("Usuário não encontrado", 404);
+        if(user.is_verified) throw new AppError("Email já verificado", 400);
+
+        const verificationCode = generateVerificationCode();
+        const codeExpiration = generateExpiration(10);
+
+        const trx = await knex.transaction();
+
+        try {
+            await trx("users").where({ email }).update({
+                verification_code: verificationCode,
+                code_expiration: codeExpiration
+            });
+
+            const { secret, expiresIn } = authConfig.jwt;
+            const tokenToVerify = sign({}, secret, {
+                subject: email,
+                expiresIn
+            });
+            await enviarCodigoPorEmail(email, verificationCode, tokenToVerify);
+            await trx.commit();
+            return response.status(200).json({ tokenToVerify });
+        } catch (error) {
+            await trx.rollback();
+            throw error;
+        }
+    }
 }
 
 module.exports = AuthController;
