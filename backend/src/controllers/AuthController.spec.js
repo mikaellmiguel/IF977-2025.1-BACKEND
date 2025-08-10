@@ -83,4 +83,23 @@ describe('AuthController', () => {
       await expect(controller.verifyEmail(req, res)).rejects.toThrow(AppError);
     });
   });
+
+  describe('Método confirmEmailToken', () => {
+    it('deve retornar e-mail se token válido e não verificado', async () => {
+      const secret = require('../configs/auth').jwt.secret;
+      const email = 'user@email.com';
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign({}, secret, { subject: email });
+      knex.mockReturnValueOnce({ where: jest.fn().mockReturnValue({ first: jest.fn().mockResolvedValue({ email, is_verified: false, code_expiration: new Date(Date.now() + 600000).toISOString() }) }) });
+      const req = { query: { token } };
+      const res = mockResponse();
+      await controller.confirmEmailToken(req, res);
+      expect(res.json).toHaveBeenCalledWith({ email });
+    });
+    it('deve lançar erro se token inválido', async () => {
+      const req = { query: { token: 'invalid' } };
+      const res = mockResponse();
+      await expect(controller.confirmEmailToken(req, res)).rejects.toThrow('Token inválido');
+    });
+  });
 });
