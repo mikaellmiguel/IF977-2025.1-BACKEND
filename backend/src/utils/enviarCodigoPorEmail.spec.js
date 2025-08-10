@@ -10,7 +10,7 @@ describe('enviarCodigoPorEmail', () => {
   const codigo = '123456';
   const token = 'token123';
   const nome = 'Usuário <user@email.com>';
-  const url = 'http://localhost/verificar-email?token=token123';
+  const url = 'http://localhost/verify?token=token123';
 
   let sendMailMock;
 
@@ -64,7 +64,7 @@ describe('enviarCodigoPorEmail', () => {
     expect(mensagemVerificacaoEmail).toHaveBeenCalledWith({
       nome,
       codigo,
-      url: 'http://localhost/verificar-email?token=token%20especial!%40'
+      url: 'http://localhost/verify?token=token%20especial!%40'
     });
   });
 

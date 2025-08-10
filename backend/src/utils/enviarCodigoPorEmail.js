@@ -12,7 +12,7 @@ async function enviarCodigoPorEmail(email, codigo, token, nome = '') {
         }
     });
 
-    const url = `${process.env.FRONTEND_URL}/verificar-email?token=${encodeURIComponent(token)}`;
+    const url = `${process.env.FRONTEND_URL}/verify?token=${encodeURIComponent(token)}`;
     const mensagem = mensagemVerificacaoEmail({ nome, codigo, url });
 
     const mailOptions = {
