@@ -1,8 +1,14 @@
+jest.mock('../configs/auth', () => ({
+  jwt: {
+    secret: 'testsecret',
+    expiresIn: '1d'
+  }
+}));
 const ensureAuthenticated = require('./ensureAuthenticated');
 const { sign } = require('jsonwebtoken');
 const AppError = require('../utils/AppError');
 
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
+process.env.JWT_SECRET =  'testsecret';
 
 const mockNext = jest.fn();
 const mockRes = () => {
