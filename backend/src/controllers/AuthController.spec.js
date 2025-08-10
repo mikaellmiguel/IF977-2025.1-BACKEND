@@ -60,4 +60,27 @@ describe('AuthController', () => {
       await expect(controller.register(req, res)).rejects.toThrow(AppError);
     });
   });
+
+  describe('Método verifyEmail', () => {
+    it('deve verificar e-mail com código correto', async () => {
+      knex.mockReturnValueOnce({ where: jest.fn().mockReturnValue({ first: jest.fn().mockResolvedValue({ email: 'user@email.com', verification_code: '123456', is_verified: false, code_expiration: new Date(Date.now() + 600000).toISOString() }) }) });
+      knex.mockReturnValueOnce({ where: jest.fn().mockReturnValue({ update: jest.fn().mockResolvedValue() }) });
+      const req = { body: { email: 'user@email.com', verificationCode: '123456' } };
+      const res = mockResponse();
+      await controller.verifyEmail(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+    it('deve lançar erro se e-mail não existir', async () => {
+      knex.mockReturnValueOnce({ where: jest.fn().mockReturnValue({ first: jest.fn().mockResolvedValue(null) }) });
+      const req = { body: { email: 'user@email.com', verificationCode: '123456' } };
+      const res = mockResponse();
+      await expect(controller.verifyEmail(req, res)).rejects.toThrow(AppError);
+    });
+    it('deve lançar erro se código estiver errado', async () => {
+      knex.mockReturnValueOnce({ where: jest.fn().mockReturnValue({ first: jest.fn().mockResolvedValue({ email: 'user@email.com', verification_code: '654321', is_verified: false, code_expiration: new Date(Date.now() + 600000).toISOString() }) }) });
+      const req = { body: { email: 'user@email.com', verificationCode: '123456' } };
+      const res = mockResponse();
+      await expect(controller.verifyEmail(req, res)).rejects.toThrow(AppError);
+    });
+  });
 });
