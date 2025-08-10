@@ -102,4 +102,44 @@ describe('AuthController', () => {
       await expect(controller.confirmEmailToken(req, res)).rejects.toThrow('Token inválido');
     });
   });
+
+  describe('Método resendVerificationCode', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('deve reenviar código se usuário não verificado', async () => {
+      // Mock isolado para consulta de usuário
+      const localMockKnex = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue({ email: 'user@email.com', is_verified: false })
+      };
+      knex.mockReturnValueOnce(localMockKnex);
+      // Mock da transação como função chamável e métodos
+      const trxObj = function() { return trxObj; };
+      trxObj.update = jest.fn().mockResolvedValue();
+      trxObj.commit = jest.fn();
+      trxObj.rollback = jest.fn();
+      trxObj.where = jest.fn().mockReturnThis();
+      knex.transaction = jest.fn().mockResolvedValue(trxObj);
+      const req = { body: { email: 'user@email.com' } };
+      const res = mockResponse();
+      await controller.resendVerificationCode(req, res);
+      expect(trxObj.update).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ tokenToVerify: expect.any(String) }));
+    });
+    it('deve lançar erro se usuário não existir', async () => {
+      // Mock isolado para consulta de usuário inexistente
+      const localMockKnex = {
+        where: jest.fn().mockReturnThis(),
+        first: jest.fn().mockResolvedValue(null)
+      };
+      knex.mockReturnValueOnce(localMockKnex);
+      // Não precisa mockar transação, pois não será chamada
+      const req = { body: { email: 'user@email.com' } };
+      const res = mockResponse();
+      await expect(controller.resendVerificationCode(req, res)).rejects.toThrow('Usuário não encontrado');
+    });
+  });
 });
