@@ -189,7 +189,7 @@ describe('AuthController', () => {
       knex.mockReturnValue(localMockKnex);
       const req = { body: { email: 'user@email.com', password: '123456' } };
       const res = mockResponse();
-      await expect(controller.login(req, res)).rejects.toThrow('Usuário não encontrado');
+      await expect(controller.login(req, res)).rejects.toThrow('Email ou senha inválidos');
     });
 
     it('deve lançar erro se usuário não verificado', async () => {
@@ -214,7 +214,7 @@ describe('AuthController', () => {
       jest.spyOn(require('bcryptjs'), 'compare').mockResolvedValue(false);
       const req = { body: { email: 'user@email.com', password: 'senhaerrada' } };
       const res = mockResponse();
-      await expect(controller.login(req, res)).rejects.toThrow('Senha incorreta');
+  await expect(controller.login(req, res)).rejects.toThrow('Email ou senha inválidos');
     });
 
     it('deve lançar erro se faltar email ou senha', async () => {

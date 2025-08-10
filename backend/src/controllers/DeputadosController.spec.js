@@ -14,7 +14,8 @@ const mockKnexInstance = {
     select: jest.fn(),
     first: jest.fn(),
     distinct: jest.fn(),
-    where: jest.fn().mockReturnThis()
+    where: jest.fn().mockReturnThis(),
+    clone: jest.fn().mockReturnThis()
 };
 
 
@@ -39,7 +40,7 @@ describe('DeputadosController', () => {
 
         
         it('deve retornar os dados do deputado quando encontrado', async () => {
-            const mockDeputado = { id: 204555, nome: 'Marcos Pereira' };
+            const mockDeputado = { id: 204555, nome: 'Marcos Pereira', isFollowing: false };
             const validarIdDeputado = require('../utils/validarIdDeputado');
             validarIdDeputado.mockResolvedValue(true);
             getDetailsDeputadoById.mockResolvedValue(mockDeputado);
@@ -177,6 +178,9 @@ describe('DeputadosController', () => {
     });
 
     describe("Metodo search", () => {
+        afterEach(() => {
+            mockKnexInstance.count.mockReturnThis();
+        });
 
         let controller;
         let response;
@@ -187,6 +191,8 @@ describe('DeputadosController', () => {
         });
 
         it('deve retornar deputados filtrando por nome', async () => {
+            mockKnexInstance.count.mockReturnThis();
+            mockKnexInstance.first.mockResolvedValue({ total: 1 });
             mockKnexInstance.orderBy.mockReturnThis();
             mockKnexInstance.where = jest.fn().mockReturnThis();
             mockKnexInstance.select.mockResolvedValue([
@@ -215,15 +221,17 @@ describe('DeputadosController', () => {
         });
 
         it('deve filtrar por partido e chamar validarPartido', async () => {
+            mockKnexInstance.count.mockReturnThis();
+            mockKnexInstance.first.mockResolvedValue({ total: 1 });
             mockKnexInstance.orderBy.mockReturnThis();
             mockKnexInstance.where = jest.fn().mockReturnThis();
             mockKnexInstance.select.mockResolvedValue([
                 { id: 2, nome: 'Deputado 2', partido: 'PT', sigla_uf: 'PE' }
             ]);
-
             mockKnexInstance.select.mockImplementation(() => Promise.resolve([
                 { id: 2, nome: 'Deputado 2', partido: 'PT', sigla_uf: 'PE' }
             ]));
+            mockKnexInstance.first.mockResolvedValue({ total: 1 });
             const request = { query: { partido: 'PT' } };
             await controller.search(request, response);
             expect(response.json).toHaveBeenCalledWith({
@@ -235,6 +243,8 @@ describe('DeputadosController', () => {
         });
 
         it('deve filtrar por uf e chamar validarSiglaUf', async () => {
+            mockKnexInstance.count.mockReturnThis();
+            mockKnexInstance.first.mockResolvedValue({ total: 1 });
             mockKnexInstance.orderBy.mockReturnThis();
             mockKnexInstance.where = jest.fn().mockReturnThis();
             mockKnexInstance.select.mockResolvedValue([
@@ -251,6 +261,8 @@ describe('DeputadosController', () => {
         });
 
         it('deve filtrar por nome, partido e uf juntos', async () => {
+            mockKnexInstance.count.mockReturnThis();
+            mockKnexInstance.first.mockResolvedValue({ total: 1 });
             mockKnexInstance.orderBy.mockReturnThis();
             mockKnexInstance.where = jest.fn().mockReturnThis();
             mockKnexInstance.select.mockResolvedValue([
@@ -267,6 +279,8 @@ describe('DeputadosController', () => {
         });
 
         it('deve retornar todos os deputados se nenhum filtro for aplicado', async () => {
+            mockKnexInstance.count.mockReturnThis();
+            mockKnexInstance.first.mockResolvedValue({ total: 3 });
             mockKnexInstance.orderBy.mockReturnThis();
             mockKnexInstance.select.mockResolvedValue([
                 { id: 5, nome: 'Deputado 1', partido: 'PMDB', sigla_uf: 'RJ' }, 
