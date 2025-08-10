@@ -7,6 +7,6 @@ const ensureAuthenticated = require('../middlewares/ensureAuthenticated');
 const usersController = new UsersController();
 
 usersRouter.put('/', usersController.update);
-// usersRouter.delete('/', usersController.delete);
+usersRouter.delete('/', usersController.delete);
 
 module.exports = usersRouter;
