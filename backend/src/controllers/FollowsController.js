@@ -18,6 +18,42 @@ class FollowsController {
         return response.status(201).json();
 
     }
+
+    async index(request, response) {
+        const id = request.user;
+        const deputadosSeguidos = await knex('follows')
+            .join('deputados', 'follows.deputado_id', '=', 'deputados.id')
+            .where('follows.user_id', id)
+            .select('deputados.*');
+
+
+        const idsDeputados = deputadosSeguidos.map(deputado => deputado.id);
+
+        const despesas = await knex('despesas')
+            .whereIn('id_deputado', idsDeputados)
+            .select('id_deputado', 'ano')
+            .sum('valor_documento as total_gasto')
+            .groupBy('id_deputado', 'ano');
+
+        const resultado = deputadosSeguidos.map(deputado => {
+            const despesasPorAno = despesas.filter(despesa => despesa.id_deputado === deputado.id)
+                .reduce((acc, despesa) => {
+                    acc[despesa.ano] = despesa.total_gasto;
+                    return acc;
+                }, {});
+
+            const totalGasto = Number(Object.values(despesasPorAno).reduce((a, b) => a + b, 0).toFixed(2));
+
+            return {
+                deputado,
+                despesasPorAno,
+                totalGasto
+            };
+        })
+        // const totalDespesas = await knex('despesas').whereIn('id_deputado', idsDeputados).sum('valor_documento as total_gasto').groupBy('id_deputado');
+
+        return response.json(resultado);
+    }
 }
 
 module.exports = FollowsController;
