@@ -54,6 +54,18 @@ class FollowsController {
 
         return response.json(resultado);
     }
+
+    async delete(request, response) {
+        const {deputado_id} = request.params;
+        const id = request.user;
+
+        const followExists = await knex('follows').where({user_id: i, deputado_id}).first();
+
+        if(!followExists) throw new AppError("Você não está seguindo este deputado", 404);
+
+        await knex('follows').where({user_id: id, deputado_id}).delete();
+        return response.status(204).json();
+    }
 }
 
 module.exports = FollowsController;
