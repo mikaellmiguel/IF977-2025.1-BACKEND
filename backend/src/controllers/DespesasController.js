@@ -19,7 +19,7 @@ class DespesasController {
         validarTipo(tipo);
 
         let query = knex("despesas")
-            .select("id", "sigla_uf", "descricao", "fornecedor", "valor_documento", "data_emissao")
+            .select("id", "sigla_uf", "descricao", "fornecedor", "valor_documento", "data_emissao", "url_documento")
             .where({ id_deputado: deputado_id }).orderBy("data_emissao", "desc");
 
         if (uf && await validarSiglaUf(uf)) query = query.where("sigla_uf", uf);
