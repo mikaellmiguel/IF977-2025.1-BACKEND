@@ -14,7 +14,7 @@ describe('validarIdDeputado', () => {
                 first: () => Promise.resolve({ id: 1 })
             })
         });
-        await expect(validarIdDeputado(1)).resolves.toBeUndefined();
+        await expect(validarIdDeputado(1)).resolves.toBe(true);
     });
 
     it('deve lançar erro se o id não for numérico', async () => {

@@ -2,7 +2,7 @@ const knex = require('../database/knex');
 const AppError = require('../utils/AppError');
 
 async function validarPartido(partido) {
-    if (!/^[A-Za-z]{2,15}$/.test(partido)) {
+    if (!/^[A-Za-zÀ-ÖØ-öø-ÿ\\s]{2,30}$/.test(partido)) {
         throw new AppError("Parâmetro 'partido' inválido", 400);
     }
 
