@@ -6,7 +6,6 @@ const deputadosRoutes = Router();
 const deputadosController = new DeputadosController();
 
 // Rota para buscar todos os deputados com paginação
-deputadosRoutes.get('/', deputadosController.index);
 deputadosRoutes.get('/search', deputadosController.search);
 deputadosRoutes.get('/:id', ensureAuthenticated, deputadosController.show);
 

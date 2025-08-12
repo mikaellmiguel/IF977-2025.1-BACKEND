@@ -10,11 +10,35 @@ jest.mock('../database/knex', () => {
 const knex = require('../database/knex');
 
 describe('validarPartido', () => {
+    it('deve aceitar partido com acento', async () => {
+        knex.mockImplementation(() => ({
+            distinct: jest.fn().mockResolvedValue([{ partido: 'UNIÃO' }, { partido: 'SOLIDARIEDADE' }])
+        }));
+        await expect(validarPartido('UNIÃO')).resolves.toBe(true);
+        await expect(validarPartido('união')).resolves.toBe(true);
+    });
+
+
+    it('deve aceitar partido com letras minúsculas e maiúsculas misturadas', async () => {
+        knex.mockImplementation(() => ({
+            distinct: jest.fn().mockResolvedValue([{ partido: 'PSDB' }])
+        }));
+        await expect(validarPartido('psdb')).resolves.toBe(true);
+        await expect(validarPartido('PsDb')).resolves.toBe(true);
+    });
+
+    it('deve lançar erro para partido com caracteres especiais', async () => {
+        await expect(validarPartido('P@T')).rejects.toThrow(AppError);
+        await expect(validarPartido('P#T')).rejects.toThrow(AppError);
+    });
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
     it('deve retornar true para partido válido presente no banco', async () => {
+        knex.mockImplementation(() => ({
+            distinct: jest.fn().mockResolvedValue([{ partido: 'PT' }, { partido: 'PSDB' }])
+        }));
         const resultado = await validarPartido('PT');
         expect(resultado).toBe(true);
     });
