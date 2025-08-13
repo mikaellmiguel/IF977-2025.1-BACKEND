@@ -1,6 +1,6 @@
+const AppError = require('../utils/AppError');
 const DespesasController = require('../controllers/DespesasController');
 const knex = require('../database/knex');
-const AppError = require('../utils/AppError');
 
 const {
     validarLimitOffset,
@@ -14,19 +14,33 @@ const buildRankingQuery = require('../utils/buildRankingQuery');
 
 
 // Realizando o mock do knex e das funções de validação
-const mockKnexInstance = {
-    select: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    offset: jest.fn().mockReturnThis(),
-    clone: jest.fn().mockReturnThis(),
-    count: jest.fn().mockReturnThis(),
-    first: jest.fn().mockReturnValue(Promise.resolve({ total: 2 })),
-    then: jest.fn() // será definido nos testes
-};
+// Mock do knex para suportar ambos usos: função e objeto
 
-jest.mock("../database/knex", () => jest.fn(() => mockKnexInstance));
+// // Mock como função e objeto
+// const mockKnex = Object.assign(
+//     jest.fn(() => mockKnexInstance),
+//     mockKnexInstance
+// );
+
+// const mockKnexInstance = {
+//     select: jest.fn().mockReturnThis(),
+//     where: jest.fn().mockReturnThis(),
+//     orderBy: jest.fn().mockReturnThis(),
+//     limit: jest.fn().mockReturnThis(),
+//     offset: jest.fn().mockReturnThis(),
+//     clone: jest.fn().mockReturnThis(),
+//     count: jest.fn().mockReturnThis(),
+//     first: jest.fn().mockReturnValue(Promise.resolve({ total: 2 })),
+//     then: jest.fn(), // será definido nos testes
+//     client: {
+//         config: {
+//             client: 'pg'
+//         }
+//     }
+// };
+
+// const mockKnex = Object.assign(jest.fn(() => mockKnexInstance), mockKnexInstance);
+
 jest.mock('../utils/validarIdDeputado', () => jest.fn());
 jest.mock('../utils/validarSiglaUf', () => jest.fn(async () => true));
 jest.mock('../utils/validarParametrosDespesas', () => ({
@@ -36,9 +50,25 @@ jest.mock('../utils/validarParametrosDespesas', () => ({
 }));
 jest.mock('../utils/buildRankingQuery', () => jest.fn());
 
+jest.mock("../database/knex", () => {
+    const mockKnexInstance = {
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        clone: jest.fn().mockReturnThis(),
+        count: jest.fn().mockReturnThis(),
+        first: jest.fn().mockReturnValue(Promise.resolve({ total: 2 })),
+        then: jest.fn(),
+        client: { config: { client: 'sqlite' } }
+    };
+    return Object.assign(jest.fn(() => mockKnexInstance), mockKnexInstance);
+});
+
 describe('DespesasController', () => {
     describe("Método index", () => {
-        let request, response;
+        let request, response, mockKnexInstance;
 
         beforeEach(() => {
             request = {
@@ -53,6 +83,9 @@ describe('DespesasController', () => {
                 }
             };
             response = { json: jest.fn() };
+
+            // Obtem a instância mockada do knex
+            mockKnexInstance = require('../database/knex')();
 
             // Limpa mocks
             Object.values(mockKnexInstance).forEach(fn => {
@@ -119,8 +152,9 @@ describe('DespesasController', () => {
         it('deve aplicar paginação corretamente', async () => {
             const controller = new DespesasController();
             await controller.index(request, response);
-            expect(mockKnexInstance.limit).toHaveBeenCalledWith(10);
-            expect(mockKnexInstance.offset).toHaveBeenCalledWith(0);
+            const mockKnexInstanceLocal = require('../database/knex')();
+            expect(mockKnexInstanceLocal.limit).toHaveBeenCalledWith(10);
+            expect(mockKnexInstanceLocal.offset).toHaveBeenCalledWith(0);
         });
 
         it('deve lançar erro se validarLimitOffset lançar', async () => {
