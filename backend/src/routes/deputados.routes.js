@@ -4,6 +4,10 @@ const DeputadosController = require('../controllers/DeputadosController');
 const deputadosRoutes = Router();
 const deputadosController = new DeputadosController();
 
+// Rota para buscar todos os deputados com paginação
+deputadosRoutes.get('/search', deputadosController.search);
+deputadosRoutes.get('/:id', deputadosController.show);
+
 /**
  * @swagger
  * components:
@@ -31,6 +35,15 @@ const deputadosController = new DeputadosController();
  *         data_nascimento:
  *           type: string
  *           format: date
+ */
+
+/**
+ * @swagger
+ * securitySchemes:
+ *   bearerAuth:
+ *     type: http
+ *     scheme: bearer
+ *     bearerFormat: JWT
  */
 
 /**
@@ -200,9 +213,5 @@ const deputadosController = new DeputadosController();
  *       404:
  *         description: Deputado não encontrado
  */
-
-// Rota para buscar todos os deputados com paginação
-deputadosRoutes.get('/search', deputadosController.search);
-deputadosRoutes.get('/:id', deputadosController.show);
 
 module.exports = deputadosRoutes;
