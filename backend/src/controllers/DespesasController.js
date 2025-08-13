@@ -20,17 +20,30 @@ class DespesasController {
 
         let query = knex("despesas")
             .select("id", "sigla_uf", "descricao", "fornecedor", "valor_documento", "data_emissao", "url_documento")
-            .where({ id_deputado: deputado_id }).orderBy("data_emissao", "desc");
+            .where({ id_deputado: deputado_id });
+
+        // Ordenação condicional para SQLite e PostgreSQL
+        if (knex.client.config.client === 'pg') {
+            query = query.orderByRaw('data_emissao DESC NULLS LAST');
+        } else {
+            query = query.orderBy('data_emissao', 'desc');
+        }
 
         if (uf && await validarSiglaUf(uf)) query = query.where("sigla_uf", uf);
         if (valor_min) query = query.where("valor_documento", ">=", valor_min);
         if (valor_max) query = query.where("valor_documento", "<=", valor_max);
         if (tipo) query = query.where("descricao", "like", `%${tipo}%`);
 
-        const totalResult = await query.clone().count('* as total').first();
+        // Corrigido: contagem separada para compatibilidade com PostgreSQL
+        let countQuery = knex("despesas").where({ id_deputado: deputado_id });
+        if (uf) countQuery = countQuery.where("sigla_uf", uf);
+        if (valor_min) countQuery = countQuery.where("valor_documento", ">=", valor_min);
+        if (valor_max) countQuery = countQuery.where("valor_documento", "<=", valor_max);
+        if (tipo) countQuery = countQuery.where("descricao", "like", `%${tipo}%`);
+        const totalResult = await countQuery.count('* as total').first();
+
         const despesas = await query.limit(limit).offset(offset);
         
-
         response.json({
             dados: despesas,
             total: totalResult ? Number(totalResult.total) : 0,
