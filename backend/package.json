@@ -6,7 +6,7 @@
     "test": "jest --passWithNoTests",
     "dev": "nodemon ./src/server.js",
     "start": "node ./src/server.js",
-    "start:prod": "set NODE_ENV=production node ./src/server.js",
+    "start:prod": "NODE_ENV=production node ./src/server.js",
     "migrate:prod": "npx knex migrate:latest --env production",
     "migrate": "npx knex migrate:latest",
     "seed": "npx knex seed:run",
