@@ -34,11 +34,11 @@ class DeputadosController {
         }
 
         let query = knex("deputados").orderBy("nome");
-        if (name) query = query.where("nome", "like", `%${name}%`);
+        if (name) query = query.where("nome", "ilike", `%${name}%`);
         if (partido && await validarPartido(partido)) query = query.where("partido", partido);
         if (uf && await validarSiglaUf(uf)) query = query.where("sigla_uf", uf);
 
-        const { total } = await query.clone().count('* as total').first();
+        const { total } = await query.clone().clearOrder().count('* as total').first();
         const deputados = await query
             .limit(limit)
             .offset(offset)

@@ -5,7 +5,12 @@
   "scripts": {
     "test": "jest --passWithNoTests",
     "dev": "nodemon ./src/server.js",
-    "start": "node ./src/server.js"
+    "start": "node ./src/server.js",
+    "start:prod": "NODE_ENV=production node ./src/server.js",
+    "migrate:prod": "npx knex migrate:latest --env production",
+    "migrate": "npx knex migrate:latest",
+    "seed": "npx knex seed:run",
+    "seed:prod": "npx knex seed:run --env production"
   },
   "keywords": [],
   "author": "",
@@ -23,11 +28,15 @@
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
     "nodemailer": "^7.0.5",
+    "pg": "^8.16.3",
     "sqlite3": "^5.1.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "unzipper": "^0.12.3"
   },
   "devDependencies": {
     "axios-mock-adapter": "^2.1.0",
+    "cross-env": "^10.0.0",
     "jest": "^30.0.2",
     "nodemon": "^3.1.10"
   }

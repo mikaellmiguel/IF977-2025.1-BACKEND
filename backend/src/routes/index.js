@@ -10,9 +10,9 @@ const ensureAuthenticated = require('../middlewares/ensureAuthenticated');
 const routes = Router();
 
 // Rotas para os deputados
-routes.use('/deputados', deputadosRoutes);
-routes.use('/despesas', despesasRoutes);
-routes.use('/referencias', referenciasRoutes);
+routes.use('/deputados', ensureAuthenticated, deputadosRoutes);
+routes.use('/despesas', ensureAuthenticated, despesasRoutes);
+routes.use('/referencias', ensureAuthenticated, referenciasRoutes);
 routes.use('/auth', authRoutes);
 routes.use('/users', ensureAuthenticated, usersRoutes);
 routes.use('/follows', ensureAuthenticated, followsRoutes);

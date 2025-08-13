@@ -14,6 +14,7 @@ const mockKnexInstance = {
     select: jest.fn(),
     first: jest.fn(),
     distinct: jest.fn(),
+    clearOrder: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     clone: jest.fn().mockReturnThis()
 };
@@ -106,7 +107,7 @@ describe('DeputadosController', () => {
             ]);
             const request = { query: { name: 'Deputado 1' } };
             await controller.search(request, response);
-            expect(mockKnexInstance.where).toHaveBeenCalledWith('nome', 'like', '%Deputado 1%');
+            expect(mockKnexInstance.where).toHaveBeenCalledWith('nome', 'ilike', '%Deputado 1%');
             expect(response.json).toHaveBeenCalledWith({
                 dados: [ { id: 1, nome: 'Deputado 1', partido: 'ABC', sigla_uf: 'PE' } ],
                 total: 1,
